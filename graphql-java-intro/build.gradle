@@ -1,0 +1,12 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName='tutorials.graphql.java.intro.Launcher'
+
+sourceCompatibility=1.8
+targetCompatibility=1.8
+
+dependencies {
+    compile project(":common-lib")
+    compile "com.graphql-java:graphql-java:${GRAPHQL_JAVA_VERSION}"
+}
