@@ -9,27 +9,23 @@ import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import org.springframework.stereotype.Service;
 import tutorials.common.utils.ResourceUtils;
 import tutorials.graphql.java.models.User;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Jitendra Singh.
  */
+@Service
 public class GraphQLService {
 
     private GraphQL graphQL;
 
-    public GraphQLService() {
-        try {
-            init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    @PostConstruct
     private void init() throws Exception {
         String schemaString = ResourceUtils.readClasspathResourceContent("users.graphql");
 
@@ -49,12 +45,14 @@ public class GraphQLService {
     private Map<String, DataFetcher> buildDataFetchers() {
         Map<String, DataFetcher> dataFetchers = new HashMap<>();
         dataFetchers.put("hello", new StaticDataFetcher("Welcome to GraphQL world."));
-        dataFetchers.put("users", env -> User.of("John", 28, "India"));
+        dataFetchers.put("users", env -> {
+            Object obj = env.getArgument("name");
+            return User.of(obj != null ? obj.toString() : "John", 28, "India");
+        });
         return dataFetchers;
     }
 
-    public Object executeQuery(String graphQLQuery) {
-        ExecutionResult result = graphQL.execute(graphQLQuery);
-        return result.getData();
+    public ExecutionResult executeQuery(String graphQLQuery) {
+        return graphQL.execute(graphQLQuery);
     }
 }

@@ -1,7 +1,11 @@
-apply plugin: 'java'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+}
 
-mainClassName='tutorials.graphql.java.intro.Launcher'
+mainClassName='tutorials.graphql.java.Launcher'
 
 sourceCompatibility=1.8
 targetCompatibility=1.8
@@ -9,4 +13,6 @@ targetCompatibility=1.8
 dependencies {
     compile project(":common-lib")
     compile "com.graphql-java:graphql-java:${GRAPHQL_JAVA_VERSION}"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 }
