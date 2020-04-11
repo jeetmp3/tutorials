@@ -1,3 +1,4 @@
-include ':graphql-java-intro'
+include ':graphql-java-intro', ':springboot-multitenancy-demo'
 include 'common-lib'
+include ':azure-oauth2-demo'
 

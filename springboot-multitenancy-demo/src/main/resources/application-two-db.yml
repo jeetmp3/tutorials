@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    generate-ddl: true
+  google:
+    datasource:
+      url: jdbc:h2:mem:test-db;INIT=CREATE SCHEMA IF NOT EXISTS google;
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+  facebook:
+    datasource:
+      url: jdbc:h2:mem:test-db;INIT=CREATE SCHEMA IF NOT EXISTS facebook;
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
