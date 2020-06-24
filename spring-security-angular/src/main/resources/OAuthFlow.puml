@@ -1,0 +1,60 @@
+@startuml
+actor User as u
+participant "Angular UI 4200" as ui
+participant "Server 8080" as s
+participant GitHub as gh
+
+autonumber
+title OAuth2 Flow
+
+note left ui
+User tries to access angular
+application running on port 4200
+end note
+u -> ui: localhost:4200/home
+alt If user is already logged in
+    u <- ui: return with home page
+else OAuth2 flow begins
+    ui -> ui:
+    note right ui
+     UI application looks for
+     the token and then redirect
+     to /login url
+    end note
+    u <-- ui: send redirect with URL\nhttp://localhost:8080/oauth2/authorization/github
+
+    u -> s: Redirected to server
+    u <-- s: Returns with the github authorization url
+
+    u -> gh: https://github.com/login/oauth/authorize
+    u <- gh: Login Form
+
+    u -> gh: User provides the credentials
+    note right u
+    Redirected to the http://localhost:4200/callback
+     with <b><color red>code</color></b> and <b><color red>state</b> parameter
+    end note
+    u <--gh
+
+    u -> ui: http://localhost:4200/callback?code=xxxx&state=xxxxx
+
+    ui -> s: http://localhost:8080/login/oauth2/code/github?\ncode=xxxxx&state=xxxxx
+
+    s -> gh: Exchange code for token
+    s <- gh: GitHub returns the token
+
+    s <- s
+    note right: We process the token and\nbuild our own JWT and then returns to the UI
+
+    ui <- s: returns {"accessToken": "xxxxxxxx"}
+
+    ui <- ui: Stores the token to local storage
+    ui <-- u: redirect with localhost:4200/home
+
+    u -> ui: http://localhost:4200/home
+    ui -> ui: Check for the token in local storage
+    u <- ui: return with home page
+end
+
+
+@enduml
