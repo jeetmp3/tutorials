@@ -1,0 +1,9 @@
+@startuml
+
+(*)  --> "UI"
+--> "Server"
+--> "GitHub"
+--> "UI"
+--> "Server"
+-->(*)
+@enduml
