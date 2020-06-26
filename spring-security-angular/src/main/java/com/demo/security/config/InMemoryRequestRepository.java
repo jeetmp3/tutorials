@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReqRepository implements AuthorizationRequestRepository< OAuth2AuthorizationRequest > {
+public class InMemoryRequestRepository implements AuthorizationRequestRepository< OAuth2AuthorizationRequest > {
 
-    private Map< String, OAuth2AuthorizationRequest > requestCache = new HashMap<>();
+    private final Map< String, OAuth2AuthorizationRequest > cache = new HashMap<>();
 
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest( HttpServletRequest request ) {
@@ -22,14 +22,19 @@ public class ReqRepository implements AuthorizationRequestRepository< OAuth2Auth
     }
 
     @Override
-    public void saveAuthorizationRequest( OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response ) {
+    public void saveAuthorizationRequest( OAuth2AuthorizationRequest authorizationRequest,
+                                          HttpServletRequest request, HttpServletResponse response ) {
         String state = authorizationRequest.getState();
-        requestCache.put( state, authorizationRequest );
+        cache.put( state, authorizationRequest );
     }
 
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest( HttpServletRequest request ) {
         String state = request.getParameter( "state" );
-        return requestCache.remove( state );
+        if ( state != null ) {
+            return cache.remove( state );
+        }
+
+        return null;
     }
 }

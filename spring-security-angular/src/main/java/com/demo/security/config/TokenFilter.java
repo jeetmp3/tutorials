@@ -1,6 +1,5 @@
-package com.demo.security;
+package com.demo.security.config;
 
-import com.demo.security.config.InMemoryTokenHandler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,22 +14,23 @@ import java.io.IOException;
 @Component
 public class TokenFilter extends OncePerRequestFilter {
 
-    private final InMemoryTokenHandler inMemoryTokenHandler;
+    private final TokenStore tokenStore;
 
-    public TokenFilter( InMemoryTokenHandler inMemoryTokenHandler ) {
-        this.inMemoryTokenHandler = inMemoryTokenHandler;
+    public TokenFilter( TokenStore tokenStore ) {
+        this.tokenStore = tokenStore;
     }
 
     @Override
     protected void doFilterInternal( HttpServletRequest request, HttpServletResponse response, FilterChain filterChain ) throws ServletException, IOException {
-        String token = request.getHeader( "Authorization" );
-        if ( token != null ) {
-            String[] tokens = token.split( " " );
-            Authentication auth = inMemoryTokenHandler.getAuthObject( tokens[ 1 ] );
-            if ( auth != null ) {
-                SecurityContextHolder.getContext().setAuthentication( auth );
+        String authToken = request.getHeader( "Authorization" );
+        if ( authToken != null ) {
+            String token = authToken.split( " " )[ 1 ];
+            Authentication authentication = tokenStore.getAuth( token );
+            if ( authentication != null ) {
+                SecurityContextHolder.getContext().setAuthentication( authentication );
             }
         }
+
         filterChain.doFilter( request, response );
     }
 }

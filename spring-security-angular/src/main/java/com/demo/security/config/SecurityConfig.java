@@ -1,6 +1,5 @@
 package com.demo.security.config;
 
-import com.demo.security.TokenFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,62 +16,65 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
-@EnableWebSecurity
 @Configuration
-public class SecuityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final InMemoryTokenHandler inMemoryTokenHandler;
+
+    private final ObjectMapper mapper;
+    private final TokenStore tokenStore;
     private final TokenFilter tokenFilter;
-    private final ObjectMapper objectMapper;
 
-    public SecuityConfig( InMemoryTokenHandler inMemoryTokenHandler, TokenFilter tokenFilter, ObjectMapper objectMapper ) {
-        this.inMemoryTokenHandler = inMemoryTokenHandler;
+    public SecurityConfig( ObjectMapper mapper, TokenStore tokenStore,
+                           TokenFilter tokenFilter ) {
+        this.mapper = mapper;
+        this.tokenStore = tokenStore;
         this.tokenFilter = tokenFilter;
-        this.objectMapper = objectMapper;
     }
 
     @Override
     protected void configure( HttpSecurity http ) throws Exception {
-        http.cors()
-                .and()
-                .authorizeRequests().antMatchers( "/oauth2/**", "/login/**" ).permitAll()
+        http.cors().and().authorizeRequests()
+                .antMatchers( "/oauth2/**", "/login**" ).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
                 .authorizationEndpoint()
-                .authorizationRequestRepository( new ReqRepository() )
+                .authorizationRequestRepository( new InMemoryRequestRepository() )
                 .and()
                 .successHandler( this::successHandler )
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint( this::failureHandler );
-
+                .authenticationEntryPoint( this::authenticationEntryPoint );
         http.addFilterBefore( tokenFilter, UsernamePasswordAuthenticationFilter.class );
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins( Arrays.asList( "*" ) );
-        configuration.setAllowedMethods( Arrays.asList( "*" ) );
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedMethods( Collections.singletonList( "*" ) );
+        config.setAllowedOrigins( Collections.singletonList( "*" ) );
+        config.setAllowedHeaders( Collections.singletonList( "*" ) );
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration( "/**", configuration );
+        source.registerCorsConfiguration( "/**", config );
         return source;
     }
 
-    private void successHandler( HttpServletRequest req, HttpServletResponse resp, Authentication auth ) throws IOException {
-        String token = inMemoryTokenHandler.saveAndGetToken( auth );
-        resp.setHeader( "Content-Type", "application/json" );
-        resp.getWriter().write( objectMapper.writeValueAsString( Collections.singletonMap( "access-token", token ) ) );
+
+    private void successHandler( HttpServletRequest request,
+                                 HttpServletResponse response, Authentication authentication ) throws IOException {
+        String token = tokenStore.generateToken( authentication );
+        response.getWriter().write(
+                mapper.writeValueAsString( Collections.singletonMap( "accessToken", token ) )
+        );
     }
 
-    public void failureHandler( HttpServletRequest request,
-                                HttpServletResponse response, AuthenticationException exception ) throws IOException {
+    private void authenticationEntryPoint( HttpServletRequest request, HttpServletResponse response,
+                                           AuthenticationException authException ) throws IOException {
         response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
-        response.getWriter().write( "Error" );
+        response.getWriter().write( mapper.writeValueAsString( Collections.singletonMap( "error", "Unauthenticated" ) ) );
     }
 }
