@@ -127,6 +127,6 @@
   },
   "defaultProject": "ui",
   "cli": {
-    "analytics": "fe18a65a-5b8d-4621-b9b7-5ddabea8aea6"
+    "analytics": false
   }
 }

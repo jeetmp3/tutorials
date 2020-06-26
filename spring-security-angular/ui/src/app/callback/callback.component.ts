@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
-import {SecurityServiceService} from "../security-service.service";
+import {SecurityService} from "../security.service";
 
 @Component({
   selector: 'app-callback',
@@ -10,25 +9,17 @@ import {SecurityServiceService} from "../security-service.service";
 })
 export class CallbackComponent implements OnInit {
 
-  tokenUrl = 'http://localhost:8080/login/oauth2/code/github';
-
   constructor(private route: ActivatedRoute,
-              private http: HttpClient,
               private router: Router,
-              private securityService: SecurityServiceService) {
+              private securityService: SecurityService) {
   }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(p => {
-      const state = p.state;
-      const code = p.code;
-
-      this.http.get(this.tokenUrl + '?code=' + code + '&state=' + state)
-        .subscribe(d => {
-          console.log(d);
-          this.securityService.updateToken(d['access-token']);
-          this.router.navigate(['/home']).then();
-        })
+      this.securityService.fetchToken(p.code, p.state).subscribe(data => {
+        this.securityService.updateToken(data.accessToken);
+        this.router.navigate(['/home']);
+      })
     })
   }
 

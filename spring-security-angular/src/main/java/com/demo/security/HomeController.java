@@ -1,4 +1,4 @@
-package com.demo.security.controllers;
+package com.demo.security;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping( "/v1/user" )
+@RequestMapping( "/v1/home" )
 public class HomeController {
 
-    @GetMapping("info")
-    public Map< String, String > hello( @AuthenticationPrincipal( expression = "attributes['name']" ) String name ) {
-        return Collections.singletonMap( "name", name );
+    @GetMapping
+    public Map<String, String> getUserName( @AuthenticationPrincipal( expression = "attributes['name']" ) String username ) {
+        return Collections.singletonMap("name", username);
     }
 }

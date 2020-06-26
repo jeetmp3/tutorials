@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {HomeService} from "../home.service";
+import {HttpClient} from "@angular/common/http";
+import {environment} from "../../environments/environment";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-home',
@@ -8,13 +10,17 @@ import {HomeService} from "../home.service";
 })
 export class HomeComponent implements OnInit {
 
-  username: string;
+  name;
 
-  constructor(private homeService: HomeService) {
+  constructor(private http: HttpClient) {
   }
 
   ngOnInit(): void {
-    this.homeService.getUserInfo().subscribe(data => this.username = data.name);
+
+    this.getUserInfo().subscribe(data => this.name = data.name);
   }
 
+  getUserInfo(): Observable<any> {
+    return this.http.get(environment.baseUrl + '/v1/home');
+  }
 }
