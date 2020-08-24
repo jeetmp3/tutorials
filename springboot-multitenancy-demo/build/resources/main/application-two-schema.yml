@@ -1,0 +1,20 @@
+spring:
+  flyway:
+    enabled: true
+    schemas:
+      - facebook
+      - google
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306?createDatabaseIfNotExist=true
+    username: root
+    password: password
+  jpa:
+    generate-ddl: true
+    show-sql: true
+application:
+  default-schema: google
+  valid-schemas:
+    - google
+    - facebook

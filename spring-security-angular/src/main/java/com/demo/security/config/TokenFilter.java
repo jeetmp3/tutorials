@@ -14,9 +14,9 @@ import java.io.IOException;
 @Component
 public class TokenFilter extends OncePerRequestFilter {
 
-    private final TokenStore tokenStore;
+    private final ITokenStore tokenStore;
 
-    public TokenFilter( TokenStore tokenStore ) {
+    public TokenFilter( ITokenStore tokenStore ) {
         this.tokenStore = tokenStore;
     }
 
@@ -25,7 +25,12 @@ public class TokenFilter extends OncePerRequestFilter {
         String authToken = request.getHeader( "Authorization" );
         if ( authToken != null ) {
             String token = authToken.split( " " )[ 1 ];
-            Authentication authentication = tokenStore.getAuth( token );
+            Authentication authentication = null;
+            try {
+                authentication = tokenStore.getAuth( token );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
             if ( authentication != null ) {
                 SecurityContextHolder.getContext().setAuthentication( authentication );
             }

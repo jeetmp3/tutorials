@@ -24,10 +24,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     private final ObjectMapper mapper;
-    private final TokenStore tokenStore;
+    private final ITokenStore tokenStore;
     private final TokenFilter tokenFilter;
 
-    public SecurityConfig( ObjectMapper mapper, TokenStore tokenStore,
+    public SecurityConfig( ObjectMapper mapper, ITokenStore tokenStore,
                            TokenFilter tokenFilter ) {
         this.mapper = mapper;
         this.tokenStore = tokenStore;
@@ -66,10 +66,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private void successHandler( HttpServletRequest request,
                                  HttpServletResponse response, Authentication authentication ) throws IOException {
-        String token = tokenStore.generateToken( authentication );
-        response.getWriter().write(
-                mapper.writeValueAsString( Collections.singletonMap( "accessToken", token ) )
-        );
+        String token = null;
+        try {
+            token = tokenStore.generateToken( authentication );
+            response.getWriter().write(
+                    mapper.writeValueAsString( Collections.singletonMap( "accessToken", token ) )
+            );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
     }
 
     private void authenticationEntryPoint( HttpServletRequest request, HttpServletResponse response,

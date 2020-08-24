@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: two-schema
+logging:
+  level:
+    org:
+      hibernate:
+        engine:
+          jdbc: DEBUG
