@@ -3,4 +3,6 @@
 out/
 **/out/
 **/*.iml
+**/build/.DS_Store
+**/.DS_Store
 **/build/
