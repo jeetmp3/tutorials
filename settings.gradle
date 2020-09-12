@@ -3,4 +3,4 @@ include 'common-lib'
 include ':azure-oauth2-demo'
 include ':spring-security-angular'
 include ':spring-security-jwt-login'
-
+include ':spring-security-azure-b2c'

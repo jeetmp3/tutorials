@@ -37,4 +37,11 @@ export class SecurityService {
     return token != null;
   }
 
+  removeToken() {
+    localStorage.removeItem(this.tokenKey);
+  }
+
+  logout(): Observable<any> {
+    return this.http.post(this.baseUrl + '/logout', this.getToken());
+  }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure( HttpSecurity http ) throws Exception {
-        http.cors().and().authorizeRequests()
+        http.csrf().disable().cors().and().authorizeRequests()
                 .antMatchers( "/oauth2/**", "/login**" ).permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -47,8 +48,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler( this::successHandler )
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint( this::authenticationEntryPoint );
+                .authenticationEntryPoint( this::authenticationEntryPoint )
+        .and().logout(cust -> cust.addLogoutHandler( this::logout ).logoutSuccessHandler( this::onLogoutSuccess ));
         http.addFilterBefore( tokenFilter, UsernamePasswordAuthenticationFilter.class );
+    }
+
+    private void logout(HttpServletRequest request, HttpServletResponse response,
+                Authentication authentication) {
+        // You can process token here
+        System.out.println("Auth token is - " + request.getHeader( "Authorization" ));
+    }
+
+    void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
+                         Authentication authentication) throws IOException, ServletException {
+        // this code is just sending the 200 ok response and preventing redirect
+        response.setStatus( HttpServletResponse.SC_OK );
     }
 
     @Bean
